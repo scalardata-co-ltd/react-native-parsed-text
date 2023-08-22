@@ -98,27 +98,34 @@ class ParsedText extends React.Component {
     if (!this.props.parse) {
       return this.props.children;
     }
-    if (typeof this.props.children !== 'string') {
-      return this.props.children;
-    }
 
-    const textExtraction = new TextExtraction(
-      this.props.children,
-      this.getPatterns(),
-    );
+    const check = (child) => {
+      if (typeof child !== 'string') {
+        return child;
+      }
 
-    return textExtraction.parse().map((props, index) => {
-      const { style: parentStyle } = this.props;
-      const { style, ...remainder } = props;
-      return (
-        <Text
-          key={`parsedText-${index}`}
-          style={[parentStyle, style]}
-          {...this.props.childrenProps}
-          {...remainder}
-        />
+      const textExtraction = new TextExtraction(child, this.getPatterns());
+
+      return textExtraction.parse().map((props, index) => {
+        const {style: parentStyle} = this.props;
+        const {style, ...remainder} = props;
+        return (
+          <Text
+            key={`parsedText-${index}`}
+            style={[parentStyle, style]}
+            {...this.props.childrenProps}
+            {...remainder}
+          />
+        );
+      });
+    };
+
+    if (this.props.children instanceof Array) {
+      return this.props.children.map((child) =>
+        check(typeof child === 'number' ? `${child}` : child),
       );
-    });
+    }
+    return check(this.props.children);
   }
 
   render() {
